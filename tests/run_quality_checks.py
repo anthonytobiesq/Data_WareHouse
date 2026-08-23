@@ -21,14 +21,14 @@ def run_assertions(conn, tests):
 
 def run_audits(conn, audits):
     """Runs inspection queries to display distinct values and verify standardization."""
-    print("\n Inspecting Standardized Categorical Columns...")
+    print("\n Inspecting Data Standardization & Outliers (Audit Checks)...")
     for name, query in audits.items():
         res = [row[0] for row in conn.sql(query).fetchall()]
         print(f" 🔍 AUDIT [{name}]: {res}")
 
 
 def run_silver_checks(conn):
-    print(" Running Complete Silver Layer Data Quality Checks...\n")
+    print(" Running Silver Layer Data Quality Checks...\n")
 
     silver_assertions = {
         # --- CRM CUST INFO ---
@@ -86,12 +86,6 @@ def run_silver_checks(conn):
                                                """,
 
         # --- ERP TABLES ---
-        "Silver ERP Cust Out-of-Range Birthdates": """
-                                                   SELECT bdate
-                                                   FROM silver.erp_cust_az12
-                                                   WHERE bdate < '1924-01-01'
-                                                      OR bdate > CURRENT_DATE;
-                                                   """,
         "Silver ERP Cat Unwanted Spaces": """
                                           SELECT *
                                           FROM silver.erp_px_cat_g1v2
@@ -99,8 +93,13 @@ def run_silver_checks(conn):
                                           """
     }
 
-    # Distinct checks to verify mapping logic output
     silver_audits = {
+        "ERP Out-of-Range Birthdates (<1924 or >Today)": """
+                                                         SELECT DISTINCT bdate
+                                                         FROM silver.erp_cust_az12
+                                                         WHERE bdate < '1924-01-01'
+                                                            OR bdate > CURRENT_DATE;
+                                                         """,
         "CRM Customer Marital Status": "SELECT DISTINCT cst_marital_status FROM silver.crm_cust_info;",
         "CRM Customer Gender": "SELECT DISTINCT cst_gndr FROM silver.crm_cust_info;",
         "CRM Product Line": "SELECT DISTINCT prd_line FROM silver.crm_prd_info;",
@@ -113,10 +112,9 @@ def run_silver_checks(conn):
     run_audits(conn, silver_audits)
 
     if failed_count > 0:
-        raise ValueError(f"\nPipeline halted! {failed_count} Silver quality check(s) failed.")
+        raise ValueError(f"\nPipeline halted! {failed_count} Silver assertion(s) failed.")
     else:
-        print("\n All Silver Quality Checks & Audits Completed Successfully!")
-
+        print("\n All Silver Layer Quality Checks Passed Successfully!")
 
 def run_gold_checks(conn):
     print("\n Running Gold Layer Data Quality Checks...\n")
