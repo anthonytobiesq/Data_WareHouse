@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="SqlDialectMappings">
+    <file url="file://$PROJECT_DIR$/build_database.py" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/gold/gold_layer.py" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/scripts/silver/transform_silver.py" dialect="GenericSQL" />
+    <file url="file://$PROJECT_DIR$/tests/run_quality_checks.py" dialect="GenericSQL" />
+  </component>
+</project>
